@@ -1,7 +1,5 @@
 # 🎓 Notenrechner BSc WiWi – FernUniversität Hagen
 
-Ein moderner, benutzerfreundlicher Notenrechner für Studierende des Bachelor-Studiengangs Wirtschaftswissenschaften (B.Sc.) an der FernUniversität in Hagen.
-
 ## 📋 Über das Projekt
 
 Dieser Notenrechner hilft Studierenden, ihre voraussichtliche Abschlussnote zu berechnen und ihren Studienverlauf zu planen. Die Anwendung unterstützt beide aktuellen Prüfungsordnungen:
@@ -128,11 +126,11 @@ wiwi-bsc-notenrechner/
 
 Diese Anwendung dient ausschließlich zur ungefähren Orientierung und Planung. Es gelten ausschließlich die offiziellen Prüfungsordnungen der FernUniversität in Hagen. Die Berechnungen erfolgen nach bestem Wissen und Gewissen, jedoch **ohne Gewähr**.
 
-Für verbindliche Auskünfte wende dich bitte an das Prüfungsamt der FernUniversität.
+Für verbindliche Auskünfte wende dich bitte an das [Prüfungsamt der FernUniversität](https://www.fernuni-hagen.de/wirtschaftswissenschaft/studium/beratung_pruefungsamt.shtml).
 
 ## 📝 Lizenz
 
-Dieses Projekt ist Open Source. Bitte beachte die geltenden Lizenzbedingungen.
+Ohne gesonderte Erlaubnis ist jede urheberrechtliche Nutzung untersagt, insbesondere die Nutzung des Inhalts im Zusammenhang mit, für oder in KI-Systemen, KI-Modellen oder Generativen Sprachmodellen.
 
 ## 🤝 Beitragen
 
