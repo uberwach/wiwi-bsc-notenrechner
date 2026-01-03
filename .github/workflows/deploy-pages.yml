@@ -51,7 +51,7 @@ jobs:
           mkdir -p _site
           
           # Copy embedded files to deployment directory
-          cp dist/* _site/
+          cp -r dist/* _site/
            
           # Add a simple 404 page
           cat > _site/404.html << 'EOF'
