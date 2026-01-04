@@ -683,7 +683,7 @@ function PflichtModuleRow({ module, points, onChange, pflichtStats }: {
                 <div className="flex items-center gap-2 shrink-0">
                     <input 
                         type="number" 
-                        placeholder={pflichtStats.averagePointsForPlaceholder ? String(pflichtStats.averagePointsForPlaceholder) : "0-100"}
+                        placeholder={pflichtStats.averagePointsForPlaceholder ? String(pflichtStats.averagePointsForPlaceholder) : "xxx"}
                         className="w-[42px] text-right px-2 py-1.5 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-slate-400"
                         value={points}
                         onChange={(e) => onChange(e.target.value)}
