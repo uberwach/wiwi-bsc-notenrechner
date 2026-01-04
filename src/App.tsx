@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { CheckCircle2, GraduationCap, Calculator, BookOpen, AlertCircle, Info, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { CheckCircle2, GraduationCap, Calculator, BookOpen, AlertCircle, Info, Trash2, TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
 
 // --- DATA CONSTANTS ---
 
@@ -466,6 +466,48 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <div className="relative group">
+              <button
+                className="px-3 py-2 text-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-2"
+                title="Hilfe"
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">Hilfe</span>
+              </button>
+              {/* Tooltip */}
+              <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-slate-200 p-4 text-sm text-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4" />
+                  Benutzungshinweise
+                </h3>
+                <div className="space-y-3 text-xs leading-relaxed">
+                  <div>
+                    <strong className="text-slate-800">Punkteeingabe:</strong>
+                    <p className="text-slate-600">Gib deine erreichten Punkte (0-100) für jedes Modul ein. Die Note wird automatisch berechnet.</p>
+                  </div>
+                  <div>
+                    <strong className="text-slate-800">Anerkannte Module:</strong>
+                    <p className="text-slate-600">Gib "A" ein, wenn ein Modul anerkannt wurde. Anerkannte Pflichtmodule zählen nicht zur Notendurchschnittsberechnung, aber als 50 Punkte für die 500-Punkte-Regel. Bei Wahlpflicht werden anerkannte Module vom Durchschnitt ausgeschlossen.</p>
+                  </div>
+                  <div>
+                    <strong className="text-slate-800">Pflichtbereich-Voraussetzungen:</strong>
+                    <ul className="list-disc list-inside text-slate-600 ml-2">
+                      <li>Mindestens 500 Punkte gesamt</li>
+                      <li>Maximal 2 Module unter 50 Punkte (mind. 25P)</li>
+                      <li>Kein Modul unter 25 Punkten</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <strong className="text-slate-800">Prognosen:</strong>
+                    <p className="text-slate-600"><em>Best Case</em> füllt fehlende Module mit 1,0 (100P), <em>Worst Case</em> mit 4,0 (50P).</p>
+                  </div>
+                  <div>
+                    <strong className="text-slate-800">Hinweis:</strong>
+                    <p className="text-slate-600">Seminar und Bachelorarbeit können nicht anerkannt werden.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <button
               onClick={handleReset}
               className="px-3 py-2 text-sm text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-2"
