@@ -178,8 +178,10 @@ export default function App() {
   };
 
   const handlePflichtPointChange = (id: string, val: string) => {
-    if (val === '' || (Number(val) >= 0 && Number(val) <= 100)) {
-      setPflichtEntries(prev => ({ ...prev, [id]: val }));
+    // Allow 'A' or 'a' for recognized modules, empty string, or valid numbers
+    const upperVal = val.toUpperCase();
+    if (val === '' || upperVal === 'A' || (Number(val) >= 0 && Number(val) <= 100)) {
+      setPflichtEntries(prev => ({ ...prev, [id]: upperVal === 'A' ? 'A' : val }));
     }
   };
 
@@ -193,10 +195,12 @@ export default function App() {
   };
 
   const handleWahlPointChange = (index: number, val: string) => {
-    if (val === '' || (Number(val) >= 0 && Number(val) <= 100)) {
+    // Allow 'A' or 'a' for recognized modules, empty string, or valid numbers
+    const upperVal = val.toUpperCase();
+    if (val === '' || upperVal === 'A' || (Number(val) >= 0 && Number(val) <= 100)) {
       setWahlSlots(prev => {
         const newSlots = [...prev];
-        newSlots[index].points = val;
+        newSlots[index].points = upperVal === 'A' ? 'A' : val;
         return newSlots;
       });
     }
@@ -234,33 +238,65 @@ export default function App() {
   const pflichtStats = useMemo(() => {
     let totalPoints = 0;
     let count = 0;
+    let hasRecognized = false;
+    let modulesUnder50 = 0;
+    let modulesUnder25 = 0;
+    let sumAllPoints = 0;
 
     PFLICHT_MODULES.forEach(m => {
       const pts = pflichtEntries[m.id];
       if (pts !== '') {
-        totalPoints += Number(pts);
-        count++;
+        if (pts === 'A') {
+          hasRecognized = true;
+        } else {
+          const points = Number(pts);
+          totalPoints += points;
+          sumAllPoints += points;
+          count++;
+          
+          if (points < 50) {
+            modulesUnder50++;
+          }
+          if (points < 25) {
+            modulesUnder25++;
+          }
+        }
       }
     });
 
     const avgPoints = count > 0 ? totalPoints / count : 0;
     const avgGrade = avgPoints > 0 ? getGrade(avgPoints) : 0;
 
+    // Check if Pflicht requirements are met
+    // Requirements:
+    // 1. Total points must be at least 500
+    // 2. At most 2 modules can be under 50 points (if they have at least 25 points)
+    // 3. No module can be under 25 points
+    const requirementsMet = !hasRecognized && count > 0 && 
+      sumAllPoints >= 500 && 
+      modulesUnder50 <= 2 && 
+      modulesUnder25 === 0;
+
     return {
       avgPoints: truncateDecimal(avgPoints, 1),
       avgGrade: avgGrade,
       averagePointsForPlaceholder: count > 0 ? Math.round(avgPoints) : null,
-      hasData: count > 0
+      hasData: count > 0 || hasRecognized,
+      hasRecognized: hasRecognized,
+      totalPoints: sumAllPoints,
+      modulesUnder50: modulesUnder50,
+      modulesUnder25: modulesUnder25,
+      requirementsMet: requirementsMet
     };
   }, [pflichtEntries]);
 
   const wahlAbschlussStats = useMemo(() => {
     // Helper function to calculate for any scenario (current, best, worst)
     const calculateScenario = (fillerGrade: number | null) => {
-      // Collect WP grades (excluding ÜK) - NO ROUNDING YET
+      // Collect WP grades (excluding ÜK and recognized modules) - NO ROUNDING YET
       const wpGrades: number[] = [];
       wahlSlots.forEach(slot => {
-        if (slot.moduleId && slot.moduleId !== 'UK' && slot.points !== '') {
+        if (slot.moduleId && slot.moduleId !== 'UK' && slot.points !== '' && slot.points !== 'A') {
           wpGrades.push(getGrade(Number(slot.points)));
         }
       });
@@ -343,20 +379,20 @@ export default function App() {
     const best = calculateScenario(1.0); // Fill with 1.0
     const worst = calculateScenario(4.0); // Fill with 4.0
 
-    // Calculate average points for placeholder
+    // Calculate average points for placeholder (excluding recognized modules)
     let totalPoints = 0;
     let pointsCount = 0;
     wahlSlots.forEach(slot => {
-      if (slot.moduleId && slot.moduleId !== 'UK' && slot.points !== '') {
+      if (slot.moduleId && slot.moduleId !== 'UK' && slot.points !== '' && slot.points !== 'A') {
         totalPoints += Number(slot.points);
         pointsCount++;
       }
     });
-    if (seminarPoints) {
+    if (seminarPoints && seminarPoints !== 'A') {
       totalPoints += Number(seminarPoints);
       pointsCount++;
     }
-    if (thesisPoints) {
+    if (thesisPoints && thesisPoints !== 'A') {
       totalPoints += Number(thesisPoints);
       pointsCount++;
     }
@@ -385,6 +421,29 @@ export default function App() {
         current: 0,
         best: 0,
         worst: 0
+      };
+    }
+
+    // If Pflicht requirements are not met (and not recognized), no final grade
+    if (!pflichtStats.hasRecognized && !pflichtStats.requirementsMet && pflichtStats.hasData) {
+      return {
+        current: 0,
+        best: 0,
+        worst: 0
+      };
+    }
+
+    // If Pflicht has recognized modules, it doesn't count towards the final grade
+    if (pflichtStats.hasRecognized) {
+      // Only Wahl/Abschluss counts (100%)
+      const current = wahlAbschlussStats.currentGrade;
+      const best = wahlAbschlussStats.bestGrade;
+      const worst = wahlAbschlussStats.worstGrade;
+
+      return {
+        current: truncateDecimal(current, 1),
+        best: truncateDecimal(best, 1),
+        worst: truncateDecimal(worst, 1)
       };
     }
 
@@ -537,12 +596,31 @@ export default function App() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <div className="text-sm text-slate-500">
-                    {pflichtStats.hasData ? `${pflichtStats.avgPoints} Punkte` : 'Keine Eingaben'}
-                  </div>
-                  <div className="text-2xl font-bold text-slate-800">
-                    {pflichtStats.hasData ? pflichtStats.avgGrade.toFixed(1) : '-,-'}
-                  </div>
+                  {pflichtStats.hasRecognized ? (
+                    <div className="text-lg font-bold text-blue-600">
+                      Anerkannt (keine Note)
+                    </div>
+                  ) : !pflichtStats.requirementsMet && pflichtStats.hasData ? (
+                    <>
+                      <div className="text-sm text-rose-600 font-medium">
+                        {pflichtStats.totalPoints} Punkte {pflichtStats.totalPoints < 500 && '(mind. 500 erforderlich)'}
+                        {pflichtStats.modulesUnder25 > 0 && `${pflichtStats.modulesUnder25} Modul(e) unter 25P`}
+                        {pflichtStats.modulesUnder25 === 0 && pflichtStats.modulesUnder50 > 2 && `${pflichtStats.modulesUnder50} Module unter 50P (max. 2)`}
+                      </div>
+                      <div className="text-lg font-bold text-rose-600">
+                        keine Note (nicht bestanden)
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-sm text-slate-500">
+                        {pflichtStats.hasData ? `${pflichtStats.avgPoints} Punkte (Summe: ${pflichtStats.totalPoints})` : 'Keine Eingaben'}
+                      </div>
+                      <div className="text-2xl font-bold text-slate-800">
+                        {pflichtStats.hasData ? pflichtStats.avgGrade.toFixed(1) : '-,-'}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -651,16 +729,21 @@ function PflichtModuleRow({ module, points, onChange, pflichtStats }: {
     onChange: (value: string) => void;
     pflichtStats: { averagePointsForPlaceholder: number | null };
 }) {
-    const pts = points ? Number(points) : null;
+    const isRecognized = points === 'A';
+    const pts = points && !isRecognized ? Number(points) : null;
     const grade = pts !== null ? getGrade(pts) : null;
     
-    const status = pts !== null 
+    const status = isRecognized
+        ? 'recognized'
+        : pts !== null 
         ? pts >= 50 ? 'passed' 
         : pts >= 25 ? 'compensable' 
         : 'failed'
         : null;
 
-    const statusIcon = status === 'passed' 
+    const statusIcon = status === 'recognized'
+        ? <CheckCircle2 className="w-5 h-5 text-blue-500" />
+        : status === 'passed' 
         ? <CheckCircle2 className="w-5 h-5 text-emerald-500" />
         : status === 'compensable'
         ? <Info className="w-5 h-5 text-amber-500" />
@@ -682,16 +765,14 @@ function PflichtModuleRow({ module, points, onChange, pflichtStats }: {
 
                 <div className="flex items-center gap-2 shrink-0">
                     <input 
-                        type="number" 
+                        type="text" 
                         placeholder={pflichtStats.averagePointsForPlaceholder ? String(pflichtStats.averagePointsForPlaceholder) : "xxx"}
-                        className="w-[42px] text-right px-2 py-1.5 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-slate-400"
+                        className="w-[42px] text-right px-2 py-1.5 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder:text-slate-400"
                         value={points}
                         onChange={(e) => onChange(e.target.value)}
-                        min="0"
-                        max="100"
                     />
                     <div className="w-12 text-center text-base font-bold text-slate-700">
-                        {grade !== null ? grade.toFixed(1) : '-'}
+                        {isRecognized ? 'A' : grade !== null ? grade.toFixed(1) : '-'}
                     </div>
                     <div className="w-6 flex items-center justify-center">
                         {statusIcon}
@@ -721,7 +802,8 @@ function WahlSlotRow({
     po: 'PO_2023' | 'PO_2025';
     wahlAbschlussStats: { averagePointsForPlaceholder: number | null };
 }) {
-    const grade = slot.points && slot.moduleId !== 'UK' ? getGrade(Number(slot.points)).toFixed(1) : '-';
+    const isRecognized = slot.points === 'A';
+    const grade = slot.points && slot.moduleId !== 'UK' && !isRecognized ? getGrade(Number(slot.points)).toFixed(1) : '-';
     const isUK = slot.moduleId === 'UK';
     
     // Add special ÜK option for slot 2 in PO 2025
@@ -750,16 +832,14 @@ function WahlSlotRow({
                 {!isUK && slot.moduleId ? (
                     <>
                         <input 
-                            type="number"
+                            type="text"
                             placeholder={wahlAbschlussStats.averagePointsForPlaceholder ? String(wahlAbschlussStats.averagePointsForPlaceholder) : "xxx"}
-                            className="w-full text-right px-2 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-slate-400"
+                            className="w-full text-right px-2 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none placeholder:text-slate-400"
                             value={slot.points}
                             onChange={(e) => onPointChange(e.target.value)}
-                            min="0"
-                            max="100"
                         />
                         <div className="text-center text-sm font-bold text-slate-700">
-                            {grade}
+                            {isRecognized ? 'A' : grade}
                         </div>
                     </>
                 ) : (
@@ -779,6 +859,7 @@ function AbschlussRow({ label, points, onChange, wahlAbschlussStats }: {
     onChange: (value: string) => void;
     wahlAbschlussStats: { averagePointsForPlaceholder: number | null };
 }) {
+    // Seminar and Thesis cannot be recognized, so always calculate grade from points
     const grade = points ? getGrade(Number(points)).toFixed(1) : '-';
     
     return (
@@ -792,6 +873,7 @@ function AbschlussRow({ label, points, onChange, wahlAbschlussStats }: {
                     value={points}
                     onChange={(e) => {
                         const val = e.target.value;
+                        // Seminar and Thesis cannot be recognized, only accept numbers
                         if (val === '' || (Number(val) >= 0 && Number(val) <= 100)) {
                             onChange(val);
                         }
