@@ -751,7 +751,7 @@ function WahlSlotRow({
                     <>
                         <input 
                             type="number"
-                            placeholder={wahlAbschlussStats.averagePointsForPlaceholder ? String(wahlAbschlussStats.averagePointsForPlaceholder) : "0-100"}
+                            placeholder={wahlAbschlussStats.averagePointsForPlaceholder ? String(wahlAbschlussStats.averagePointsForPlaceholder) : "xxx"}
                             className="w-full text-right px-2 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-slate-400"
                             value={slot.points}
                             onChange={(e) => onPointChange(e.target.value)}
@@ -787,7 +787,7 @@ function AbschlussRow({ label, points, onChange, wahlAbschlussStats }: {
             <div className="grid grid-cols-[42px_48px] gap-2 items-center">
                 <input 
                     type="number"
-                    placeholder={wahlAbschlussStats.averagePointsForPlaceholder ? String(wahlAbschlussStats.averagePointsForPlaceholder) : "0-100"}
+                    placeholder={wahlAbschlussStats.averagePointsForPlaceholder ? String(wahlAbschlussStats.averagePointsForPlaceholder) : "xxx"}
                     className="w-full text-right px-2 py-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-emerald-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-slate-400"
                     value={points}
                     onChange={(e) => {
