@@ -238,16 +238,18 @@ export default function App() {
   const pflichtStats = useMemo(() => {
     let totalPoints = 0;
     let count = 0;
-    let hasRecognized = false;
     let modulesUnder50 = 0;
     let modulesUnder25 = 0;
     let sumAllPoints = 0;
+    let recognizedCount = 0;
 
     PFLICHT_MODULES.forEach(m => {
       const pts = pflichtEntries[m.id];
       if (pts !== '') {
         if (pts === 'A') {
-          hasRecognized = true;
+          // Recognized modules don't count for grade average, but count as 50P for 500P rule
+          recognizedCount++;
+          sumAllPoints += 50;
         } else {
           const points = Number(pts);
           totalPoints += points;
@@ -269,10 +271,10 @@ export default function App() {
 
     // Check if Pflicht requirements are met
     // Requirements:
-    // 1. Total points must be at least 500
+    // 1. Total points must be at least 500 (recognized modules count as 50P)
     // 2. At most 2 modules can be under 50 points (if they have at least 25 points)
     // 3. No module can be under 25 points
-    const requirementsMet = !hasRecognized && count > 0 && 
+    const requirementsMet = count + recognizedCount > 0 && 
       sumAllPoints >= 500 && 
       modulesUnder50 <= 2 && 
       modulesUnder25 === 0;
@@ -281,8 +283,8 @@ export default function App() {
       avgPoints: truncateDecimal(avgPoints, 1),
       avgGrade: avgGrade,
       averagePointsForPlaceholder: count > 0 ? Math.round(avgPoints) : null,
-      hasData: count > 0 || hasRecognized,
-      hasRecognized: hasRecognized,
+      hasData: count > 0 || recognizedCount > 0,
+      recognizedCount: recognizedCount,
       totalPoints: sumAllPoints,
       modulesUnder50: modulesUnder50,
       modulesUnder25: modulesUnder25,
@@ -424,26 +426,12 @@ export default function App() {
       };
     }
 
-    // If Pflicht requirements are not met (and not recognized), no final grade
-    if (!pflichtStats.hasRecognized && !pflichtStats.requirementsMet && pflichtStats.hasData) {
+    // If Pflicht requirements are not met, no final grade
+    if (!pflichtStats.requirementsMet && pflichtStats.hasData) {
       return {
         current: 0,
         best: 0,
         worst: 0
-      };
-    }
-
-    // If Pflicht has recognized modules, it doesn't count towards the final grade
-    if (pflichtStats.hasRecognized) {
-      // Only Wahl/Abschluss counts (100%)
-      const current = wahlAbschlussStats.currentGrade;
-      const best = wahlAbschlussStats.bestGrade;
-      const worst = wahlAbschlussStats.worstGrade;
-
-      return {
-        current: truncateDecimal(current, 1),
-        best: truncateDecimal(best, 1),
-        worst: truncateDecimal(worst, 1)
       };
     }
 
@@ -596,11 +584,7 @@ export default function App() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  {pflichtStats.hasRecognized ? (
-                    <div className="text-lg font-bold text-blue-600">
-                      Anerkannt (keine Note)
-                    </div>
-                  ) : !pflichtStats.requirementsMet && pflichtStats.hasData ? (
+                  {!pflichtStats.requirementsMet && pflichtStats.hasData ? (
                     <>
                       <div className="text-sm text-rose-600 font-medium">
                         {pflichtStats.totalPoints} Punkte {pflichtStats.totalPoints < 500 && '(mind. 500 erforderlich)'}
@@ -614,7 +598,14 @@ export default function App() {
                   ) : (
                     <>
                       <div className="text-sm text-slate-500">
-                        {pflichtStats.hasData ? `${pflichtStats.avgPoints} Punkte (Summe: ${pflichtStats.totalPoints})` : 'Keine Eingaben'}
+                        {pflichtStats.hasData ? (
+                          <>
+                            {pflichtStats.avgPoints} Punkte (Summe: {pflichtStats.totalPoints})
+                            {pflichtStats.recognizedCount > 0 && (
+                              <span className="text-blue-600 ml-1">inkl. {pflichtStats.recognizedCount} anerkannt (à 50P)</span>
+                            )}
+                          </>
+                        ) : 'Keine Eingaben'}
                       </div>
                       <div className="text-2xl font-bold text-slate-800">
                         {pflichtStats.hasData ? pflichtStats.avgGrade.toFixed(1) : '-,-'}
