@@ -133,10 +133,10 @@ export const calculateWahlAbschlussStats = (
 ): WahlAbschlussStats => {
   // Helper function to calculate for any scenario (current, best, worst)
   const calculateScenario = (fillerGrade: number | null) => {
-    // Collect WP grades (excluding ÜK and recognized modules) - NO ROUNDING YET
+    // Collect WP grades (excluding recognized modules; a graded ÜK counts like a WP) - NO ROUNDING YET
     const wpGrades: number[] = [];
     wahlSlots.forEach(slot => {
-      if (slot.moduleId && slot.moduleId !== 'UK' && slot.points !== '' && slot.points !== 'A') {
+      if (slot.moduleId && slot.points !== '' && slot.points !== 'A') {
         wpGrades.push(getGrade(Number(slot.points)));
       }
     });
@@ -145,12 +145,16 @@ export const calculateWahlAbschlussStats = (
     const semGrade = seminarPoints ? getGrade(Number(seminarPoints)) : (fillerGrade || null);
     const thesisGrade = thesisPoints ? getGrade(Number(thesisPoints)) : (fillerGrade || null);
 
-    // Check configuration
-    const hasUK = wahlSlots.some(s => s.moduleId === 'UK');
+    // ÜK is optional graded: without a grade it is ungraded and shifts the weights
+    const hasUngradedUK = wahlSlots.some(
+      s => s.moduleId === 'UK' && (s.points === '' || s.points === 'A')
+    );
 
     // Fill missing WP slots with filler grade if provided
     const totalWPSlots = 6;
-    const filledWPSlots = wahlSlots.filter(s => s.moduleId && s.moduleId !== 'UK').length;
+    const filledWPSlots = wahlSlots.filter(
+      s => s.moduleId && !(s.moduleId === 'UK' && hasUngradedUK)
+    ).length;
     const missingWPSlots = totalWPSlots - filledWPSlots;
     
     if (fillerGrade !== null && missingWPSlots > 0) {
@@ -185,13 +189,13 @@ export const calculateWahlAbschlussStats = (
 
     const abschlussAvg = abschlussCount > 0 ? abschlussSum / abschlussCount : 0;
 
-    // Calculate weights based on PO and whether ÜK is used
+    // Calculate weights based on PO and whether an ungraded ÜK is used
     let wpWeight = 0.75; // default (6/8)
     let abschlussWeight = 0.25; // default (2/8)
 
     if (po === 'PO_2025') {
-      if (hasUK) {
-        // 5 WP + ÜK + Sem + Thesis(2x) = 5 vs 3 => 5/8 vs 3/8
+      if (hasUngradedUK) {
+        // 5 WP + ungraded ÜK + Sem + Thesis(2x) = 5 vs 3 => 5/8 vs 3/8
         wpWeight = 5/8;
         abschlussWeight = 3/8;
       } else {
@@ -223,7 +227,7 @@ export const calculateWahlAbschlussStats = (
   let totalPoints = 0;
   let pointsCount = 0;
   wahlSlots.forEach(slot => {
-    if (slot.moduleId && slot.moduleId !== 'UK' && slot.points !== '' && slot.points !== 'A') {
+    if (slot.moduleId && slot.points !== '' && slot.points !== 'A') {
       totalPoints += Number(slot.points);
       pointsCount++;
     }

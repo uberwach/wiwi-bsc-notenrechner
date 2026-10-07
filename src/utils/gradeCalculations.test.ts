@@ -424,6 +424,24 @@ describe('calculateWahlAbschlussStats', () => {
       expect(stats.abschlussWeight).toBe('33'); // 1/3 = 33.333...
     });
 
+    it('should count a graded ÜK like a WP with 2/3 and 1/3 weights (PO_2025)', () => {
+      const wahlSlots: WahlSlot[] = [
+        { moduleId: 'M1', points: '100' },
+        { moduleId: 'M2', points: '100' },
+        { moduleId: 'UK', points: '50' }, // graded ÜK = 4.0
+        { moduleId: 'M4', points: '100' },
+        { moduleId: 'M5', points: '100' },
+        { moduleId: 'M6', points: '100' },
+      ];
+
+      const stats = calculateWahlAbschlussStats(wahlSlots, '100', '100', 'PO_2025');
+
+      expect(stats.wpWeight).toBe('67');
+      expect(stats.abschlussWeight).toBe('33');
+      // (5*1.0 + 4.0) / 6 = 1.5
+      expect(stats.wpAvg).toBe('1.50');
+    });
+
     it('should use 5/8 and 3/8 weights with ÜK (PO_2025)', () => {
       const wahlSlots: WahlSlot[] = [
         { moduleId: 'M1', points: '100' },

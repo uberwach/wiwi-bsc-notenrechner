@@ -118,7 +118,7 @@ wiwi-bsc-notenrechner/
   - Durchschnitt der Prozentpunkte aller 10 Pflichtmodule → Note
 - **Wahl- und Abschlussbereich**: 75% Gewichtung
   - 4-6 Wahlpflichtmodule mit flexibler Substitution
-  - Optional: Überfachliche Kompetenzen (ÜK)
+  - Optional: Überfachliche Kompetenzen (ÜK), Note optional (ohne Note: 5/8 : 3/8, mit Note zählt ÜK wie ein Wahlpflichtmodul)
   - 1-2 Seminare
   - 1 Bachelorarbeit (zählt doppelt!)
 

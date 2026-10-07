@@ -172,7 +172,6 @@ export default function App() {
     setWahlSlots(prev => {
       const newSlots = [...prev];
       newSlots[index].moduleId = moduleId;
-      if (moduleId === 'UK') newSlots[index].points = ''; // ÜK has no grade
       return newSlots;
     });
   };
@@ -614,8 +613,7 @@ function WahlSlotRow({
     wahlAbschlussStats: { averagePointsForPlaceholder: number | null };
 }) {
     const isRecognized = slot.points === 'A';
-    const grade = slot.points && slot.moduleId !== 'UK' && !isRecognized ? getGrade(Number(slot.points)).toFixed(1) : '-';
-    const isUK = slot.moduleId === 'UK';
+    const grade = slot.points && !isRecognized ? getGrade(Number(slot.points)).toFixed(1) : '-';
     
     // Add special ÜK option for slot 2 in PO 2025
     const showUKOption = po === 'PO_2025' && index === 2;
@@ -631,7 +629,7 @@ function WahlSlotRow({
                 >
                     <option value="">-- Modul wählen --</option>
                     {showUKOption && (
-                        <option value="UK">Überfachliche Kompetenzen (keine Note)</option>
+                        <option value="UK">Überfachliche Kompetenzen (Note optional)</option>
                     )}
                     {availableModules.map(m => (
                         <option key={m.id} value={m.id}>
@@ -640,7 +638,7 @@ function WahlSlotRow({
                     ))}
                 </select>
                 
-                {!isUK && slot.moduleId ? (
+                {slot.moduleId ? (
                     <>
                         <input 
                             type="text"
@@ -655,7 +653,7 @@ function WahlSlotRow({
                     </>
                 ) : (
                     <>
-                        <div className="text-xs text-slate-400 text-center">{isUK ? 'keine Note' : '-'}</div>
+                        <div className="text-xs text-slate-400 text-center">-</div>
                         <div className="text-center text-sm text-slate-400">-</div>
                     </>
                 )}
