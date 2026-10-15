@@ -280,7 +280,7 @@ export default function App() {
                   </div>
                   <div>
                     <strong className="text-slate-800">Hinweis:</strong>
-                    <p className="text-slate-600">Seminar und Bachelorarbeit können nicht anerkannt werden.</p>
+                    <p className="text-slate-600">Für Seminar und Bachelorarbeit ist im Rechner nur die Eingabe von Punkten (0-100) vorgesehen.</p>
                   </div>
                 </div>
               </div>
@@ -490,11 +490,11 @@ export default function App() {
               {/* Summary */}
               <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">⌀ Wahlpflicht ({wahlAbschlussStats.wpWeight}%):</span>
+                  <span className="text-slate-600">⌀ Wahlpflicht (intern {wahlAbschlussStats.wpWeight}%):</span>
                   <span className="font-bold text-slate-800">{wahlAbschlussStats.wpAvg}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">⌀ Abschluss ({wahlAbschlussStats.abschlussWeight}%):</span>
+                  <span className="text-slate-600">⌀ Abschluss (intern {wahlAbschlussStats.abschlussWeight}%):</span>
                   <span className="font-bold text-slate-800">{wahlAbschlussStats.abschlussAvg}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-300 flex justify-between">
@@ -502,6 +502,9 @@ export default function App() {
                   <span className="text-xl font-bold text-emerald-700">
                     {wahlAbschlussStats.hasData ? wahlAbschlussStats.combinedAvg.toFixed(1) : '-,-'}
                   </span>
+                </div>
+                <div className="text-xs text-slate-500 pt-1">
+                  Interne Verteilung im Wahl-/Abschlussbereich (Gesamtgewichtung bleibt {po === 'PO_2023' ? '80%' : '75%'}).
                 </div>
               </div>
             </div>

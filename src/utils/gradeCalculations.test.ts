@@ -475,6 +475,23 @@ describe('calculateWahlAbschlussStats', () => {
       expect(stats.wpWeight).toBe('75'); // 6/8 = 0.75
       expect(stats.abschlussWeight).toBe('25'); // 2/8 = 0.25
     });
+
+    it('should match ECTS-weighted average across WP, seminar and thesis (PO_2023)', () => {
+      const wahlSlots: WahlSlot[] = [
+        { moduleId: 'M1', points: '100' }, // 1.0
+        { moduleId: 'M2', points: '80' },  // 2.0
+        { moduleId: 'M3', points: '70' },  // 2.7
+        { moduleId: 'M4', points: '60' },  // 3.3
+        { moduleId: 'M5', points: '50' },  // 4.0
+        { moduleId: 'M6', points: '90' },  // 1.3
+      ];
+
+      const stats = calculateWahlAbschlussStats(wahlSlots, '75', '65', 'PO_2023'); // 2.3, 3.0
+
+      // PO_2023: all 8 modules weighted equally by ECTS -> (sum(WP grades) + seminar + thesis) / 8
+      const expected = (1.0 + 2.0 + 2.7 + 3.3 + 4.0 + 1.3 + 2.3 + 3.0) / 8;
+      expect(stats.currentGrade).toBeCloseTo(expected, 10);
+    });
   });
 
   describe('Edge cases - thesis weight in PO_2025', () => {
@@ -493,6 +510,23 @@ describe('calculateWahlAbschlussStats', () => {
       const stats = calculateWahlAbschlussStats(wahlSlots, '50', '100', 'PO_2025');
 
       expect(parseFloat(stats.abschlussAvg)).toBeCloseTo(2.0, 2);
+    });
+
+    it('should match ECTS-weighted average with thesis counted double (PO_2025)', () => {
+      const wahlSlots: WahlSlot[] = [
+        { moduleId: 'M1', points: '100' }, // 1.0
+        { moduleId: 'M2', points: '80' },  // 2.0
+        { moduleId: 'M3', points: '70' },  // 2.7
+        { moduleId: 'M4', points: '60' },  // 3.3
+        { moduleId: 'M5', points: '50' },  // 4.0
+        { moduleId: 'M6', points: '90' },  // 1.3
+      ];
+
+      const stats = calculateWahlAbschlussStats(wahlSlots, '75', '65', 'PO_2025'); // 2.3, 3.0
+
+      // PO_2025: thesis counts double -> (sum(WP grades) + seminar + 2*thesis) / 9
+      const expected = (1.0 + 2.0 + 2.7 + 3.3 + 4.0 + 1.3 + 2.3 + (3.0 * 2)) / 9;
+      expect(stats.currentGrade).toBeCloseTo(expected, 10);
     });
 
     it('should count thesis 1x in PO_2023', () => {
