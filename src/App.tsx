@@ -498,17 +498,14 @@ export default function App() {
                   <span className="font-bold text-slate-800">{wahlAbschlussStats.abschlussAvg}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-300 flex justify-between">
-                  <span className="text-slate-700 font-medium">Gesamtnote Wahl-/Abschlussbereich:</span>
+                  <span className="text-sm text-slate-600">Gesamtnote Wahl-/Abschlussbereich:</span>
                   <span className="text-xl font-bold text-emerald-700">
                     {wahlAbschlussStats.hasData ? wahlAbschlussStats.combinedAvg.toFixed(1) : '-,-'}
                   </span>
                 </div>
-                <div className="text-xs text-slate-500 pt-1">
-                  Interne Verteilung im Wahl-/Abschlussbereich (Gesamtgewichtung bleibt {po === 'PO_2023' ? '80%' : '75%'}).
-                </div>
                 <div className="pt-3 mt-1 border-t-2 border-slate-300 flex justify-between items-end">
                   <div>
-                    <div className="text-sm font-medium text-slate-700">Voraussichtliche Abschlussnote</div>
+                    <div className="text-base font-semibold text-slate-700">Voraussichtliche Abschlussnote</div>
                     <div className="text-xs text-slate-500">
                       Pflicht {po === 'PO_2023' ? '20%' : '25%'} + Wahl/Abschluss {po === 'PO_2023' ? '80%' : '75%'}
                     </div>
