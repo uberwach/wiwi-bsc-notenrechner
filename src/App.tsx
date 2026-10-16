@@ -367,7 +367,7 @@ export default function App() {
                 <BookOpen className="w-5 h-5 text-blue-600" /> Pflichtbereich
               </h3>
               <span className="text-xs bg-blue-100 px-3 py-1 rounded-full text-blue-700 font-medium">
-                {po === 'PO_2023' ? '20%' : '25%'} Gewichtung
+                {po === 'PO_2023' ? '20%' : '25%'} Gewichtung der Endnote
               </span>
             </div>
             
@@ -443,7 +443,7 @@ export default function App() {
                 <Calculator className="w-5 h-5 text-emerald-600" /> Wahl- und Abschlussbereich
               </h3>
               <span className="text-xs bg-emerald-100 px-3 py-1 rounded-full text-emerald-700 font-medium">
-                {po === 'PO_2023' ? '80%' : '75%'} Gewichtung
+                {po === 'PO_2023' ? '80%' : '75%'} Gewichtung der Endnote
               </span>
             </div>
 
@@ -506,21 +506,18 @@ export default function App() {
                 <div className="text-xs text-slate-500 pt-1">
                   Interne Verteilung im Wahl-/Abschlussbereich (Gesamtgewichtung bleibt {po === 'PO_2023' ? '80%' : '75%'}).
                 </div>
+                <div className="pt-3 mt-1 border-t-2 border-slate-300 flex justify-between items-end">
+                  <div>
+                    <div className="text-sm font-medium text-slate-700">Voraussichtliche Abschlussnote</div>
+                    <div className="text-xs text-slate-500">
+                      Pflicht {po === 'PO_2023' ? '20%' : '25%'} + Wahl/Abschluss {po === 'PO_2023' ? '80%' : '75%'}
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-emerald-700">
+                    {finalGrade.current > 0 ? finalGrade.current.toFixed(1).replace('.', ',') : '-,-'}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* FINAL GRADE BOX */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="text-sm opacity-90 mb-1">Voraussichtliche Abschlussnote</div>
-                <div className="text-5xl font-bold">{finalGrade.current > 0 ? finalGrade.current.toFixed(1) : '-,-'}</div>
-              </div>
-              <GraduationCap className="w-16 h-16 opacity-20" />
-            </div>
-            <div className="mt-4 text-xs opacity-75">
-              Berechnung: Pflicht {po === 'PO_2023' ? '20%' : '25%'} + Wahl/Abschluss {po === 'PO_2023' ? '80%' : '75%'}
             </div>
           </div>
         </div>
